@@ -62,7 +62,7 @@ func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 	}
 
 	if _, err := h.c.Send(msg); err != nil {
-		fmt.Fprintf(os.Stderr, "error sending message: %v\n", err)
+		log.Fatalf("error sending message: %v\n", err)
 	}
 
 	graceShutDown("message sent")
@@ -85,7 +85,10 @@ func getMessageFromSchedule() (string, error) {
 	}
 
 	var schedule Schedule
-	json.Unmarshal(byteValue, &schedule)
+	err = json.Unmarshal(byteValue, &schedule)
+	if err != nil {
+		log.Fatalf("schedule error: %v", err)
+	}
 	today := int(time.Now().Weekday())
 
 	for _, day := range schedule {
