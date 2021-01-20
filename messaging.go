@@ -43,10 +43,10 @@ Reply by condition
 */
 func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 	chatId, _ := os.LookupEnv("CHAT_ID")
+	senderId, _ := os.LookupEnv("AUTHOR_PHONE")
 	search, _ := os.LookupEnv("SEARCH")
 
-	// TODO: add sender check
-	if message.Info.Timestamp < h.startTime || !strings.Contains(strings.ToLower(message.Text), search) || message.Info.RemoteJid != chatId {
+	if message.Info.Timestamp < h.startTime || !strings.Contains(strings.ToLower(message.Text), search) || message.Info.RemoteJid != chatId || !strings.Contains(message.Info.SenderJid, senderId) {
 		return
 	}
 
