@@ -19,8 +19,14 @@ func init() {
 }
 
 func main() {
+	clientName, _ := os.LookupEnv("CLIENT_NAME")
+
 	//create new WhatsApp connection
-	wac, err := whatsapp.NewConn(5 * time.Second)
+	wac, err := whatsapp.NewConnWithOptions(&whatsapp.Options{
+		Timeout:         10 * time.Second,
+		ShortClientName: clientName,
+		LongClientName:  clientName,
+	})
 	if err != nil {
 		log.Fatalf("error creating connection: %v\n", err)
 	}
@@ -38,8 +44,7 @@ func main() {
 		if err := writeSession(session); err != nil {
 			log.Fatalf("error saving session: %v", err)
 		}
-		fmt.Println("Day is empty. Terminating")
-		// todo: soft terminate without error
+		graceShutDown("Day is empty. Terminating")
 	}
 
 	//add custom handlers
@@ -71,4 +76,11 @@ func main() {
 	if err := writeSession(session); err != nil {
 		log.Fatalf("error saving session: %v", err)
 	}
+}
+
+// graceShutDown - terminates script without error
+func graceShutDown(msg string) {
+	fmt.Println(msg)
+	fmt.Println("Grace shutdown")
+	os.Exit(0)
 }

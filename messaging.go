@@ -65,7 +65,7 @@ func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 		fmt.Fprintf(os.Stderr, "error sending message: %v\n", err)
 	}
 
-	fmt.Printf("message sent to user %v\n", message.Info.RemoteJid)
+	graceShutDown("message sent")
 }
 
 /**
