@@ -62,9 +62,10 @@ func main() {
 	//add custom handlers
 	wac.AddHandler(&waHandler{wac, uint64(time.Now().Unix()), msgText, tgBot})
 
-	//login or restore
+	//login or restore session
 	err = login(wac)
 	if err != nil {
+		tgLog(fmt.Sprintf("error logging in: %v\n", err), tgBot)
 		log.Fatalf("error logging in: %v\n", err)
 	}
 
