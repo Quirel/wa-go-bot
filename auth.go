@@ -10,6 +10,9 @@ import (
 
 const sessionFilePath = "./whatsappSession.gob"
 
+/*
+readSession - reads previously saved session from file
+*/
 func readSession() (whatsapp.Session, error) {
 	session := whatsapp.Session{}
 	file, err := os.Open(sessionFilePath)
@@ -25,6 +28,9 @@ func readSession() (whatsapp.Session, error) {
 	return session, nil
 }
 
+/*
+writeSession - writes successful session to file
+*/
 func writeSession(session whatsapp.Session) error {
 	file, err := os.Create(sessionFilePath)
 	if err != nil {
@@ -39,6 +45,9 @@ func writeSession(session whatsapp.Session) error {
 	return nil
 }
 
+/*
+login - restores session or create new by QR-code scan
+*/
 func login(wac *whatsapp.Conn) error {
 	//load saved session
 	session, err := readSession()
@@ -67,6 +76,6 @@ func login(wac *whatsapp.Conn) error {
 		return fmt.Errorf("error saving session: %v\n", err)
 	}
 
-	fmt.Printf("login successful, session: %v\n", session)
+	fmt.Println("login successful")
 	return nil
 }
