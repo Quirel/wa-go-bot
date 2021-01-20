@@ -68,6 +68,7 @@ func main() {
 		tgLog(fmt.Sprintf("error logging in: %v\n", err), tgBot)
 		log.Fatalf("error logging in: %v\n", err)
 	}
+	tgLog("Login successful", tgBot)
 
 	//verifies phone connectivity
 	pong, err := wac.AdminTest()
@@ -113,7 +114,7 @@ func graceShutDown(msg string, tgBot *tgbotapi.BotAPI, wac *whatsapp.Conn) {
 func tgLog(msg string, tgBot *tgbotapi.BotAPI) {
 	tgChatId, _ := os.LookupEnv("TELEGRAM_LOG_CHAT_ID")
 	tgChatIdInt, _ := strconv.ParseInt(tgChatId, 10, 64)
-	tgMsg := tgbotapi.NewMessage(tgChatIdInt, msg)
+	tgMsg := tgbotapi.NewMessage(tgChatIdInt, "Wa-Go-Bot: "+msg)
 	_, err := tgBot.Send(tgMsg)
 	if err != nil {
 		log.Fatalf("Send telegram error: %v\n", err)
