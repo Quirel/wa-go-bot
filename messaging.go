@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/Rhymen/go-whatsapp"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,9 +12,10 @@ import (
 )
 
 type waHandler struct {
-	c         *whatsapp.Conn
+	wac       *whatsapp.Conn
 	startTime uint64
 	msg       string
+	tgBot     *tgbotapi.BotAPI
 }
 
 //HandleError needs to be implemented to be a valid WhatsApp handler
@@ -24,7 +25,7 @@ func (h *waHandler) HandleError(err error) {
 		log.Println("Waiting 30sec...")
 		<-time.After(30 * time.Second)
 		log.Println("Reconnecting...")
-		err := h.c.Restore()
+		err := h.wac.Restore()
 		if err != nil {
 			log.Fatalf("Restore failed: %v", err)
 		}
@@ -44,11 +45,6 @@ func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 	chatId, _ := os.LookupEnv("CHAT_ID")
 	search, _ := os.LookupEnv("SEARCH")
 
-	if message.Info.Timestamp >= h.startTime {
-		fmt.Printf("senderJid: %v, id: %v, remoteJid: %v, \nmessage:\t%v\n", message.Info.SenderJid, message.Info.Id, message.Info.RemoteJid,
-			message.Text)
-	}
-
 	// TODO: add sender check
 	if message.Info.Timestamp < h.startTime || !strings.Contains(strings.ToLower(message.Text), search) || message.Info.RemoteJid != chatId {
 		return
@@ -61,11 +57,11 @@ func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 		Text: h.msg,
 	}
 
-	if _, err := h.c.Send(msg); err != nil {
+	if _, err := h.wac.Send(msg); err != nil {
 		log.Fatalf("error sending message: %v\n", err)
 	}
 
-	graceShutDown("message sent")
+	graceShutDown("Message sent. Terminating", h.tgBot, h.wac)
 }
 
 /**
