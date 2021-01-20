@@ -33,7 +33,7 @@ func (h *waHandler) HandleError(err error) {
 		if err.Error() == "message type not implemented" {
 			return
 		}
-		log.Printf("error occoured: %v\n", err)
+		log.Fatalf("error occoured: %v\n", err)
 	}
 }
 

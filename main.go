@@ -16,7 +16,7 @@ import (
 // init - loads .env
 func init() {
 	if err := godotenv.Load(); err != nil {
-		log.Print("No .env file found")
+		log.Fatalln("No .env file found")
 	}
 }
 
@@ -101,7 +101,7 @@ func graceShutDown(msg string, tgBot *tgbotapi.BotAPI, wac *whatsapp.Conn) {
 		if err != nil {
 			log.Fatalf("error disconnecting: %v\n", err)
 		}
-		log.Println("wac.Disconnect")
+		fmt.Println("wac.Disconnect")
 		if err := writeSession(session); err != nil {
 			log.Fatalf("error saving session: %v", err)
 		}
