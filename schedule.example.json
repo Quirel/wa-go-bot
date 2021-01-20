@@ -1,0 +1,10 @@
+[
+  {
+    "day": 1,
+    "message": "Text message for Monday"
+  },
+  {
+    "day": 2,
+    "message": "Text message Tuesday"
+  }
+]

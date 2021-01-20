@@ -25,5 +25,9 @@
 # End of https://www.toptal.com/developers/gitignore/api/go
 
 whatsappSession.gob
+schedule.json
+.env
 
 .idea
+
+wa-go-bot
