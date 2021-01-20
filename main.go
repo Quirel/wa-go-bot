@@ -24,10 +24,12 @@ func main() {
 	clientNameShort, _ := os.LookupEnv("CLIENT_NAME_SHORT")
 	clientNameLong, _ := os.LookupEnv("CLIENT_NAME_LONG")
 	clientVersion, _ := os.LookupEnv("CLIENT_NAME_VERSION")
+	clientTimeoutString, _ := os.LookupEnv("WA_CLIENT_TIMEOUT")
+	clientTimeout, _ := strconv.Atoi(clientTimeoutString)
 
 	//create new WhatsApp connection
 	wac, err := whatsapp.NewConnWithOptions(&whatsapp.Options{
-		Timeout:         5 * time.Second,
+		Timeout:         time.Duration(clientTimeout) * time.Second,
 		ShortClientName: clientNameShort,
 		LongClientName:  clientNameLong,
 		ClientVersion:   clientVersion,
