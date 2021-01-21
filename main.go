@@ -62,8 +62,6 @@ func main() {
 		graceShutDown("⚠️ Day is empty. Terminating", tgBot, wac)
 	}
 
-	tgLog(fmt.Sprintf("Message to send:\n%v", msgText), tgBot)
-
 	//add custom handlers
 	wac.AddHandler(&waHandler{wac, uint64(time.Now().Unix()), msgText, tgBot})
 
@@ -74,6 +72,7 @@ func main() {
 		log.Fatalf("error logging in: %v\n", err)
 	}
 	tgLog("Login successful", tgBot)
+	tgLog(fmt.Sprintf("Message to send:\n%v", msgText), tgBot)
 
 	//verifies phone connectivity
 	pong, err := wac.AdminTest()
