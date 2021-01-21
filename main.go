@@ -48,6 +48,7 @@ func main() {
 	//get message for current day from schedule
 	msgText, err := getMessageFromSchedule()
 	if err != nil {
+		tgLog(fmt.Sprintf("❌ schedule error: %v", err), tgBot)
 		log.Fatalf("schedule error: %v", err)
 	}
 	if msgText == "" {
@@ -58,7 +59,7 @@ func main() {
 		if err := writeSession(session); err != nil {
 			log.Fatalf("error saving session: %v", err)
 		}
-		graceShutDown("Day is empty. Terminating", tgBot, wac)
+		graceShutDown("⚠️ Day is empty. Terminating", tgBot, wac)
 	}
 
 	//add custom handlers
@@ -67,7 +68,7 @@ func main() {
 	//login or restore session
 	err = login(wac)
 	if err != nil {
-		tgLog(fmt.Sprintf("error logging in: %v\n", err), tgBot)
+		tgLog(fmt.Sprintf("❌ error logging in: %v\n", err), tgBot)
 		log.Fatalf("error logging in: %v\n", err)
 	}
 	tgLog("Login successful", tgBot)
@@ -76,7 +77,7 @@ func main() {
 	pong, err := wac.AdminTest()
 
 	if !pong || err != nil {
-		tgLog(fmt.Sprintf("error pinging in: %v\n", err), tgBot)
+		tgLog(fmt.Sprintf("❌ error pinging in: %v\n", err), tgBot)
 		log.Fatalf("error pinging in: %v\n", err)
 	}
 

@@ -61,7 +61,7 @@ func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 		log.Fatalf("error sending message: %v\n", err)
 	}
 
-	graceShutDown("Message sent. Terminating", h.tgBot, h.wac)
+	graceShutDown("✅ Message sent. Terminating", h.tgBot, h.wac)
 }
 
 /**
@@ -72,7 +72,7 @@ func getMessageFromSchedule() (string, error) {
 	msg := ""
 	byteValue, err := ioutil.ReadFile("./schedule.json")
 	if err != nil {
-		log.Fatalf("schedule error: %v", err)
+		return msg, err
 	}
 
 	type Schedule []struct {
@@ -83,7 +83,7 @@ func getMessageFromSchedule() (string, error) {
 	var schedule Schedule
 	err = json.Unmarshal(byteValue, &schedule)
 	if err != nil {
-		log.Fatalf("schedule error: %v", err)
+		return msg, err
 	}
 	today := int(time.Now().Weekday())
 
