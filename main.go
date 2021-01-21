@@ -78,8 +78,7 @@ func main() {
 	pong, err := wac.AdminTest()
 
 	if !pong || err != nil {
-		tgLog(fmt.Sprintf("❌ error pinging in: %v\n", err), tgBot)
-		log.Fatalf("error pinging in: %v\n", err)
+		tgLog(fmt.Sprintf("⚠️ error pinging in: %v\n", err), tgBot)
 	}
 
 	c := make(chan os.Signal, 1)
