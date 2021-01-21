@@ -62,6 +62,8 @@ func main() {
 		graceShutDown("⚠️ Day is empty. Terminating", tgBot, wac)
 	}
 
+	tgLog(fmt.Sprintf("Message to send:\n%v", msgText), tgBot)
+
 	//add custom handlers
 	wac.AddHandler(&waHandler{wac, uint64(time.Now().Unix()), msgText, tgBot})
 
@@ -87,11 +89,14 @@ func main() {
 
 	//Disconnect safe
 	fmt.Println("Shutting down now.")
+	tgLog("⚠️ Shutting down now.", tgBot)
 	session, err := wac.Disconnect()
 	if err != nil {
+		tgLog(fmt.Sprintf("❌ error disconnecting: %v", err), tgBot)
 		log.Fatalf("error disconnecting: %v\n", err)
 	}
 	if err := writeSession(session); err != nil {
+		tgLog(fmt.Sprintf("❌ error saving session: %v", err), tgBot)
 		log.Fatalf("error saving session: %v", err)
 	}
 }
