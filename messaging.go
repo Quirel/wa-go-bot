@@ -43,10 +43,18 @@ Reply by condition
 */
 func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 	chatId, _ := os.LookupEnv("CHAT_ID")
+	testChatId, _ := os.LookupEnv("TEST_CHAT_ID")
 	senderId, _ := os.LookupEnv("AUTHOR_PHONE")
 	search, _ := os.LookupEnv("SEARCH")
 
-	if message.Info.Timestamp < h.startTime || !strings.Contains(strings.ToLower(message.Text), search) || message.Info.RemoteJid != chatId || !strings.Contains(message.Info.SenderJid, senderId) {
+	isNewMessage := message.Info.Timestamp >= h.startTime
+	isTargetChat := message.Info.RemoteJid != chatId
+	isTargetSender := strings.Contains(message.Info.SenderJid, senderId)
+	isTargetText := strings.Contains(strings.ToLower(message.Text), search)
+	isTargetMessage := isNewMessage && isTargetText && isTargetSender && isTargetChat
+	isTestMessage := message.Info.RemoteJid == testChatId && strings.Contains(strings.ToLower(message.Text), "@echo")
+
+	if !isTargetMessage || !isTestMessage {
 		return
 	}
 

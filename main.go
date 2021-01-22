@@ -75,11 +75,18 @@ func main() {
 	tgLog(fmt.Sprintf("Message to send:\n%v", msgText), tgBot)
 
 	//verifies phone connectivity
-	pong, err := wac.AdminTest()
-
-	if !pong || err != nil {
-		tgLog(fmt.Sprintf("⚠️ error pinging in: %v\n", err), tgBot)
-	}
+	//pong, err := wac.AdminTest()
+	//
+	//pingError := false
+	//if !pong || err != nil {
+	//	tgLog(fmt.Sprintf("⚠️ error pinging in: %v\n", err), tgBot)
+	//	pingError = true
+	//} else {
+	//	if pingError {
+	//		pingError = false
+	//		tgLog(fmt.Sprintf("⚠️ pinging is OK"), tgBot)
+	//	}
+	//}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
