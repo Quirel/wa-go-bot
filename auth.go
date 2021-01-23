@@ -77,5 +77,6 @@ func login(wac *whatsapp.Conn) error {
 	}
 
 	fmt.Println("login successful")
+	fmt.Println("============================")
 	return nil
 }

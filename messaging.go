@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/Rhymen/go-whatsapp"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -42,19 +44,34 @@ HandleTextMessage - receives messages
 Reply by condition
 */
 func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
-	chatId, _ := os.LookupEnv("CHAT_ID")
-	testChatId, _ := os.LookupEnv("TEST_CHAT_ID")
-	senderId, _ := os.LookupEnv("AUTHOR_PHONE")
-	search, _ := os.LookupEnv("SEARCH")
+	isDebug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
+	chatId := os.Getenv("CHAT_ID")
+	testChatId := os.Getenv("TEST_CHAT_ID")
+	senderId := os.Getenv("AUTHOR_PHONE")
+	search := os.Getenv("SEARCH")
 
 	isNewMessage := message.Info.Timestamp >= h.startTime
 	isTargetChat := message.Info.RemoteJid != chatId
 	isTargetSender := strings.Contains(message.Info.SenderJid, senderId)
 	isTargetText := strings.Contains(strings.ToLower(message.Text), search)
+	isTestMessage := isNewMessage && message.Info.RemoteJid == testChatId && strings.Contains(strings.ToLower(message.Text), "@echo")
 	isTargetMessage := isNewMessage && isTargetText && isTargetSender && isTargetChat
-	isTestMessage := message.Info.RemoteJid == testChatId && strings.Contains(strings.ToLower(message.Text), "@echo")
+	doSkipMessage := !isTargetMessage
 
-	if !isTargetMessage || !isTestMessage {
+	if isDebug {
+		// search for testMessage
+		doSkipMessage = !isTestMessage
+
+		// Additional logs
+		if message.Info.RemoteJid == testChatId && isNewMessage {
+			fmt.Printf("Mssage text:\n%v\n---\n", message.Text)
+			fmt.Printf("time: %v, chatId: %v, senderId: %v\n",
+				message.Info.Timestamp, message.Info.RemoteJid, message.Info.SenderJid)
+			fmt.Println("============================")
+		}
+	}
+
+	if doSkipMessage {
 		return
 	}
 
@@ -69,7 +86,9 @@ func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 		log.Fatalf("error sending message: %v\n", err)
 	}
 
-	graceShutDown("✅ Message sent. Terminating", h.tgBot, h.wac)
+	if !isDebug {
+		graceShutDown("✅ Message sent. Terminating", h.tgBot, h.wac)
+	}
 }
 
 /**
@@ -94,6 +113,11 @@ func getMessageFromSchedule() (string, error) {
 		return msg, err
 	}
 	today := int(time.Now().Weekday())
+
+	// My week starts from monday
+	if today == 0 {
+		today = 7
+	}
 
 	for _, day := range schedule {
 		if day.Day == today {
