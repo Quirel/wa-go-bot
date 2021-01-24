@@ -51,17 +51,14 @@ func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 	search := os.Getenv("SEARCH")
 
 	isNewMessage := message.Info.Timestamp >= h.startTime
-	isTargetChat := message.Info.RemoteJid != chatId
+	isTargetChat := message.Info.RemoteJid == chatId
 	isTargetSender := strings.Contains(message.Info.SenderJid, senderId)
 	isTargetText := strings.Contains(strings.ToLower(message.Text), search)
 	isTestMessage := isNewMessage && message.Info.RemoteJid == testChatId && strings.Contains(strings.ToLower(message.Text), "@echo")
 	isTargetMessage := isNewMessage && isTargetText && isTargetSender && isTargetChat
-	doSkipMessage := !isTargetMessage
+	doSkipMessage := !isTargetMessage && !isTestMessage
 
 	if isDebug {
-		// search for testMessage
-		doSkipMessage = !isTestMessage
-
 		// Additional logs
 		if message.Info.RemoteJid == testChatId && isNewMessage {
 			fmt.Printf("Mssage text:\n%v\n---\n", message.Text)
@@ -81,12 +78,21 @@ func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 		},
 		Text: h.msg,
 	}
+	if isTestMessage {
+		msg = whatsapp.TextMessage{
+			Info: whatsapp.MessageInfo{
+				RemoteJid: message.Info.RemoteJid,
+			},
+			Text: "Ping is OK!",
+		}
+	}
 
 	if _, err := h.wac.Send(msg); err != nil {
+		tgLog(fmt.Sprintf("error sending message: %v\n", err), h.tgBot)
 		log.Fatalf("error sending message: %v\n", err)
 	}
 
-	if !isDebug {
+	if !isDebug && !isTestMessage {
 		graceShutDown("✅ Message sent. Terminating", h.tgBot, h.wac)
 	}
 }
