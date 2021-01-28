@@ -27,14 +27,17 @@ func (h *waHandler) HandleError(err error) {
 		log.Println("Waiting 30sec...")
 		<-time.After(30 * time.Second)
 		log.Println("Reconnecting...")
+		tgLog("Reconnecting...", h.tgBot)
 		err := h.wac.Restore()
 		if err != nil {
+			tgLog(fmt.Sprintf("Restore failed: %v", err), h.tgBot)
 			log.Fatalf("Restore failed: %v", err)
 		}
 	} else {
 		if err.Error() == "message type not implemented" {
 			return
 		}
+		tgLog(fmt.Sprintf("error occoured: %v\n", err), h.tgBot)
 		log.Fatalf("error occoured: %v\n", err)
 	}
 }
