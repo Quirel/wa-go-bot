@@ -23,6 +23,10 @@ github.com/mattn/go-isatty v0.0.5 h1:tHXDdz1cpzGaovsTB+TVB8q90WEokoVmfMqoVcrLUgw
 github.com/mattn/go-isatty v0.0.5/go.mod h1:Iq45c/XA43vh69/j3iqttzPXn0bhXyGjM0Hdxcsrc5s=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/quirel/telegram-logger v1.0.1 h1:k8TXY7J/Fx0uwGTzfNIMCXmH6Aj4bQn+MnF3aumvykY=
+github.com/quirel/telegram-logger v1.0.1/go.mod h1:bUs/nOaQebSf4ZSElR/830N5V70HWBTRnJxxjUiFZus=
+github.com/quirel/telegram-logger v1.0.2 h1:nJtPzGz/s6tTthA/PMGpOCVSrgBCgwMKb4jZVqlewyo=
+github.com/quirel/telegram-logger v1.0.2/go.mod h1:bUs/nOaQebSf4ZSElR/830N5V70HWBTRnJxxjUiFZus=
 github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9 h1:lpEzuenPuO1XNTeikEmvqYFcU37GVLl8SRNblzyvGBE=
 github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9/go.mod h1:PLPIyL7ikehBD1OAjmKKiOEhbvWyHGaNDjquXMcYABo=
 github.com/technoweenie/multipartstreamer v1.0.1 h1:XRztA5MXiR1TIRHxH2uNxXxaIkKQDeX7m2XsSOlQEnM=

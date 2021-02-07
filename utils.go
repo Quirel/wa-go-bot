@@ -3,15 +3,39 @@ package main
 import (
 	"fmt"
 	"github.com/Rhymen/go-whatsapp"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tlogger "github.com/quirel/telegram-logger"
 	"log"
 	"os"
 	"strconv"
 	"time"
 )
 
-// graceShutDown - terminates script without error
-func graceShutDown(msg string, tgBot *tgbotapi.BotAPI, wac *whatsapp.Conn) {
+var tgLogger *tlogger.TgLogger
+
+//var once sync.Once
+
+// createTgLoggerInstance creates or returns instance of telegram-logger
+func createTgLoggerInstance() *tlogger.TgLogger {
+	//once.Do(func() {
+	tgToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+	tgChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_LOG_CHAT_ID"), 10, 64)
+	log.Println("Create new tg-logger")
+	var err error
+	level := "info"
+	if isDebug {
+		level = "info"
+	}
+	tgLogger, err = tlogger.NewLogger(level, tgToken, []int64{tgChatId})
+	if err != nil {
+		log.Fatal("Problem with creating telegram-logger")
+	}
+	tgLogger.SetName("WA Volley Bot")
+	//})
+	return tgLogger
+}
+
+// graceShutDown terminates script without error
+func graceShutDown(msg string, wac *whatsapp.Conn) {
 	if wac.GetConnected() {
 		session, err := wac.Disconnect()
 		if err != nil {
@@ -22,25 +46,14 @@ func graceShutDown(msg string, tgBot *tgbotapi.BotAPI, wac *whatsapp.Conn) {
 			log.Fatalf("error saving session: %v", err)
 		}
 	}
-	tgLog(msg, tgBot)
+	tgLogger.Info(msg)
 	fmt.Println(msg)
 	fmt.Println("Grace shutdown")
 	os.Exit(0)
 }
 
-// tgLog - logs message to telegram chat
-func tgLog(msg string, tgBot *tgbotapi.BotAPI) {
-	tgChatId := os.Getenv("TELEGRAM_LOG_CHAT_ID")
-	tgChatIdInt, _ := strconv.ParseInt(tgChatId, 10, 64)
-	tgMsg := tgbotapi.NewMessage(tgChatIdInt, "Wa-Go-Bot: "+msg)
-	_, err := tgBot.Send(tgMsg)
-	if err != nil {
-		log.Fatalf("Send telegram error: %v\n", err)
-	}
-}
-
-// ping - verifies phone connectivity
-func ping(wac *whatsapp.Conn, tgBot *tgbotapi.BotAPI) {
+// ping verifies phone connectivity
+func ping(wac *whatsapp.Conn) {
 	isDebug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
 	pingTime, _ := strconv.Atoi(os.Getenv("PING_TIME"))
 
@@ -51,14 +64,14 @@ func ping(wac *whatsapp.Conn, tgBot *tgbotapi.BotAPI) {
 		pong, err := wac.AdminTest()
 
 		if !pong || err != nil {
-			tgLog(fmt.Sprintf("⚠️ error pinging: %v\n", err), tgBot)
+			tgLogger.Error(fmt.Sprintf("Error pinging: %v\n", err))
 			if isDebug {
 				fmt.Printf("⚠️ error pinging: %v\n", err)
 			}
 			isPinged = false
 			//log.Fatalf("⚠️ error pinging in: %v\n", err)
 		} else if !isPinged {
-			tgLog(fmt.Sprintf("⚠️✅ Ping is OK"), tgBot)
+			tgLogger.Warn("✅ Ping is OK")
 			if isDebug {
 				fmt.Printf("⚠️✅ Ping is OK")
 			}

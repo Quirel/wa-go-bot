@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Rhymen/go-whatsapp"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -17,7 +15,6 @@ type waHandler struct {
 	wac       *whatsapp.Conn
 	startTime uint64
 	msg       string
-	tgBot     *tgbotapi.BotAPI
 }
 
 //HandleError needs to be implemented to be a valid WhatsApp handler
@@ -27,17 +24,17 @@ func (h *waHandler) HandleError(err error) {
 		log.Println("Waiting 30sec...")
 		<-time.After(30 * time.Second)
 		log.Println("Reconnecting...")
-		tgLog("Reconnecting...", h.tgBot)
+		tgLogger.Warn("Reconnecting...")
 		err := h.wac.Restore()
 		if err != nil {
-			tgLog(fmt.Sprintf("Restore failed: %v", err), h.tgBot)
+			tgLogger.Error(fmt.Sprintf("Restore failed: %v", err))
 			log.Fatalf("Restore failed: %v", err)
 		}
 	} else {
 		if err.Error() == "message type not implemented" {
 			return
 		}
-		tgLog(fmt.Sprintf("error occoured: %v\n", err), h.tgBot)
+		tgLogger.Error(fmt.Sprintf("error occoured: %v\n", err))
 		log.Fatalf("error occoured: %v\n", err)
 	}
 }
@@ -47,7 +44,6 @@ HandleTextMessage - receives messages
 Reply by condition
 */
 func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
-	isDebug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
 	chatId := os.Getenv("CHAT_ID")
 	testChatId := os.Getenv("TEST_CHAT_ID")
 	senderId := os.Getenv("AUTHOR_PHONE")
@@ -91,12 +87,12 @@ func (h *waHandler) HandleTextMessage(message whatsapp.TextMessage) {
 	}
 
 	if _, err := h.wac.Send(msg); err != nil {
-		tgLog(fmt.Sprintf("error sending message: %v\n", err), h.tgBot)
+		tgLogger.Error(fmt.Sprintf("error sending message: %v\n", err))
 		log.Fatalf("error sending message: %v\n", err)
 	}
 
 	if !isDebug && !isTestMessage {
-		graceShutDown("✅ Message sent. Terminating", h.tgBot, h.wac)
+		graceShutDown("✅ Message sent. Terminating", h.wac)
 	}
 }
 

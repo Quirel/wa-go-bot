@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/Rhymen/go-whatsapp"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -13,6 +12,8 @@ import (
 	"time"
 )
 
+var isDebug bool
+
 // init - loads .env
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -21,9 +22,12 @@ func init() {
 }
 
 func main() {
-	isDebug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
+	// initiate telegram-logger instance
+	createTgLoggerInstance()
+	isDebug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
 	if isDebug {
 		fmt.Println("⚠️ DEBUG MODE")
+		tgLogger.Debug("DEBUG MODE")
 	} else {
 		fmt.Println("⚠️ PRODUCTION MODE")
 	}
@@ -44,17 +48,10 @@ func main() {
 		log.Fatalf("error creating connection: %v\n", err)
 	}
 
-	//create Telegram connection for logs
-	tgToken := os.Getenv("TELEGRAM_BOT_TOKEN")
-	tgBot, err := tgbotapi.NewBotAPI(tgToken)
-	if err != nil {
-		log.Fatalf("error creating telegram connection: %v\n", err)
-	}
-
 	//get message for current day from schedule
 	msgText, err := getMessageFromSchedule()
 	if err != nil {
-		tgLog(fmt.Sprintf("❌ schedule error: %v", err), tgBot)
+		tgLogger.Error(fmt.Sprintf("Schedule error: %v", err))
 		log.Fatalf("schedule error: %v", err)
 	}
 	if msgText == "" {
@@ -65,22 +62,22 @@ func main() {
 		if err := writeSession(session); err != nil {
 			log.Fatalf("error saving session: %v", err)
 		}
-		graceShutDown("⚠️ Day is empty. Terminating", tgBot, wac)
+		graceShutDown("⚠️ Day is empty. Terminating", wac)
 	}
 
 	//add custom handlers
-	wac.AddHandler(&waHandler{wac, uint64(time.Now().Unix()), msgText, tgBot})
+	wac.AddHandler(&waHandler{wac, uint64(time.Now().Unix()), msgText})
 
 	//login or restore session
 	err = login(wac)
 	if err != nil {
-		tgLog(fmt.Sprintf("❌ error logging in: %v\n", err), tgBot)
+		tgLogger.Error(fmt.Sprintf("Error logging in: %v\n", err))
 		log.Fatalf("error logging in: %v\n", err)
 	}
-	tgLog(fmt.Sprintf("Login successful\nMessage to send:\n%v", msgText), tgBot)
+	tgLogger.Info(fmt.Sprintf("Login successful\nMessage to send:\n%v", msgText))
 
 	// check phone connectivity
-	go ping(wac, tgBot)
+	go ping(wac)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -88,14 +85,14 @@ func main() {
 
 	//Disconnect safe
 	fmt.Println("\nShutting down now.")
-	tgLog("⚠️ Shutting down now.", tgBot)
+	tgLogger.Warn("Shutting down now.")
 	session, err := wac.Disconnect()
 	if err != nil {
-		tgLog(fmt.Sprintf("❌ error disconnecting: %v", err), tgBot)
+		tgLogger.Error(fmt.Sprintf("Error disconnecting: %v", err))
 		log.Fatalf("error disconnecting: %v\n", err)
 	}
-	if err := writeSession(session); err != nil {
-		tgLog(fmt.Sprintf("❌ error saving session: %v", err), tgBot)
+	if err = writeSession(session); err != nil {
+		tgLogger.Error(fmt.Sprintf("Error saving session: %v", err))
 		log.Fatalf("error saving session: %v", err)
 	}
 }
